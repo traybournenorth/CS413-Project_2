@@ -1,0 +1,3183 @@
+<!--Project 2: League of Legends Questionaire Game
+
+	Keyboard movement cite: 
+	https://github.com/kittykatattack/learningPixi/blob/master/examples/12_keyboardMovement.html
+-->
+
+<!doctype html>
+<meta charset="utf-8">
+
+  <title>Project 2</title>
+
+  <body>
+
+    <h1>Instructions</h1>
+
+      <p> When in the menu screen, use the W and S keys to navigate through the menu options ( Press enter to move to next screen ).
+          <br><br>
+          When choosing your avatar, use the A and D keys to pick ( Press space to pick avatar and start game ). 
+          Use the W, A, S, D keys to <br><br> 
+          move your avatar next to the answers of each question. If you are right, you will gain 100 points. If you are wrong you will gain 0 points. Good luck! </p>
+
+    <audio id="audio">
+
+      <source src="Blue.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+
+    </audio>
+
+    <script src="pixi.min.js"></script>
+
+    <script>
+
+      // Aliases
+      let Application = PIXI.Application;
+      let Text = PIXI.Text;
+      let Container = PIXI.Container;
+      let loader = PIXI.loader;
+      let resources = PIXI.loader.resources;
+      let TextureCache = PIXI.utils.TextureCache;
+      let Sprite = PIXI.Sprite;
+
+      // Creates PIXI application
+      let app = new Application(
+      { 
+        width: 400, 
+        height: 400,  
+        backgroundColor: 0xE0E0E0,                     
+        antialiasing: true, 
+        transparent: false, 
+        resolution: 1
+      });
+
+      // Adds game to HTML document
+      document.body.appendChild( app.view );
+
+      loader.add( "mover.png" );
+      loader.add( "teamLiquidAvatar.png" );
+      loader.add( "tsmAvatar.png" );
+      loader.add( "opticAvatar.png" );
+      loader.load( setStage );
+
+      // Defines variables
+      var mover;
+      var mover2;
+      var liquidAvatar;
+      var tsmAvatar;
+      var opticAvatar;
+      var userAvatar;
+      var state;
+      var canMove;
+      var canPressSpace;
+      var mainScreenEnter;
+      var moveHorizontal;
+      var moveInAllDirections;
+      var moveForQuestionTwo;
+      var moveForQuestionThree;
+      var moveForQuestionFour;
+      var moveForQuestionFive;
+      var moveForQuestionSix;
+      var moveForQuestionSeven;
+      var moveForQuestionEight;
+      var moveForQuestionNine;
+      var moveForQuestionTen;
+      var score;
+      var newScore;
+
+      // Set the game state
+      state = play;
+   
+      // Start the game loop 
+      app.ticker.add( delta => gameLoop( delta ) );
+
+      function setStage() 
+      {
+        // Allows you to move in this menu
+        canMove = true;
+
+        mainScreenEnter = true;
+
+      	// Creates mover sprite 
+        mover = new Sprite( resources[ "mover.png" ].texture );
+
+        // Welcome text
+        let text = new PIXI.Text( 'Welcome to League... The Ultimate Questionaire', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000, visible: true } );
+
+        // Position it and add it to the stage
+        text.position.set( 30, 80 );
+        app.stage.addChild( text );
+
+        let menu = new PIXI.Text( 'Start\nInstructions\nCredits', { fontFamily : 'Arial', fontSize: 15, fill : 0x000000, visible: true } );
+
+        // Position it and add it to the stage
+        menu.position.set( 150, 200 );
+        app.stage.addChild( menu );
+
+        // Position and add mover to screen
+        mover.position.x = 130;
+        mover.position.y = 203;
+
+        app.stage.addChild( mover );
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let sKey = keyboard( 83 );
+        let enter = keyboard( 13 );
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( mover.position.y < 237 && canMove )
+          {
+            mover.position.y += 18;
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          mover.position.y += 0;
+        };
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( mover.position.y > 203 && canMove )
+          {
+            mover.position.y -= 18;
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          mover.position.y -= 0;
+        };
+
+        // Enter press method
+        enter.press = () => 
+        {
+          if ( mover.position.y == 221 && mainScreenEnter )
+          {
+            app.stage.removeChild( text );
+            app.stage.removeChild( menu );
+            app.stage.removeChild( mover );
+            instructions();
+          }
+
+          else if ( mover.position.y == 239 && mainScreenEnter )
+          {
+            app.stage.removeChild( text );
+            app.stage.removeChild( menu );
+            app.stage.removeChild( mover );
+            credits();
+          }
+
+          else
+          {
+            if ( mainScreenEnter )
+            {
+              app.stage.removeChild( text );
+              app.stage.removeChild( menu );
+              app.stage.removeChild( mover );
+              mainScreenEnter = false;
+              pickAvatar();
+            }
+          }
+        };
+      }
+
+      function gameLoop( delta )
+      {
+        // Update the current game state
+        state( delta );
+      }
+
+      function play( delta ) 
+      {
+        // NOT SURE WHAT TO ADD HERE
+      }
+
+      // Function that shows the credits page
+      function credits()
+      {
+        canMove = false;
+        mainScreenEnter = false;
+
+        let enter = keyboard( 13 );
+
+        // Credits text
+        let creditsText = new PIXI.Text( 'Credits', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        creditsText.position.set( 165, 80 );
+        app.stage.addChild( creditsText );
+
+        // Credit information text
+        let creditInfoText = new PIXI.Text( 'Game designer: Traybourne North\n\nComposer: Trayburne North' +
+                                            '\n\nSupervisor: Traybourne North\n\nProject Manager: Traybourne North', 
+                                            { fontFamily : 'Arial', fontSize: 15, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        creditInfoText.position.set( 70, 130 );
+        app.stage.addChild( creditInfoText );
+
+        // Back to menu text
+        let menuText = new PIXI.Text( 'Press enter to go back to menu', { fontFamily : 'Arial', fontSize: 12, 
+                                       fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        menuText.position.set( 25, 348 );
+        app.stage.addChild( menuText );
+
+        // Creates mover sprite 
+        moverTwo = new Sprite( resources[ "mover.png" ].texture );
+
+        moverTwo.position.x = 10;
+        moverTwo.position.y = 350;
+
+        app.stage.addChild( moverTwo );
+
+        // Enter press method
+        enter.press = () => 
+        {
+          app.stage.removeChild( creditsText );
+          app.stage.removeChild( creditInfoText );
+          app.stage.removeChild( menuText );
+          app.stage.removeChild( mover2 );
+          window.location.replace( "http://dana.ucc.nau.edu/tpn26/MyProjectDosGame/project_2.html" );
+        };
+      }
+
+      // Function that shows the instructions page
+      function instructions()
+      {
+        canMove = false;
+        mainScreenEnter = false;
+
+        let enter = keyboard( 13 );
+
+        // Credits text
+        let instructionsText = new PIXI.Text( 'Instructions', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        instructionsText.position.set( 165, 80 );
+        app.stage.addChild( instructionsText );
+
+        // Credit information text
+        let instructionsInfoText = new PIXI.Text( 'Use the W, A, S, D keys to move your avatar next to\nthe answers ' +
+                                                  'of each question. If you are right, you will\ngain 100 points. ' +
+                                                  'If you are wrong, you will gain 0 points.\nGood luck and have fun!',
+                                                  { fontFamily : 'Arial', fontSize: 15, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        instructionsInfoText.position.set( 15, 130 );
+        app.stage.addChild( instructionsInfoText );
+
+        // Back to menu text
+        let menuText = new PIXI.Text( 'Press enter to go back to menu', { fontFamily : 'Arial', fontSize: 12, 
+                                       fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        menuText.position.set( 25, 348 );
+        app.stage.addChild( menuText );
+
+        // Creates mover sprite 
+        moverTwo = new Sprite( resources[ "mover.png" ].texture );
+
+        moverTwo.position.x = 10;
+        moverTwo.position.y = 350;
+
+        app.stage.addChild( moverTwo );
+
+        // Enter press method
+        enter.press = () => 
+        {
+          app.stage.removeChild( instructionsText );
+          app.stage.removeChild( instructionsInfoText );
+          app.stage.removeChild( menuText );
+          app.stage.removeChild( mover2 );
+          window.location.replace( "http://dana.ucc.nau.edu/tpn26/MyProjectDosGame/project_2.html" );
+        };
+      }
+
+      // Function that shows avatars to choose from
+      function pickAvatar()
+      {
+        canMove = false;
+        moveHorizontal = true;
+        canPressSpace = true;
+
+        let aKey = keyboard( 65 );
+        let dKey = keyboard( 68 );
+        let space = keyboard( 32 );
+
+        // Avatar text
+        let avatarText = new PIXI.Text( 'Choose your team avatar', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000  } );
+
+        // Position it and add it to the stage
+        avatarText.position.set( 100, 80 );
+        app.stage.addChild( avatarText );
+
+        // Team Liquid text
+        let teamLiquidText = new PIXI.Text( 'Team Liquid', { fontFamily : 'Arial', fontSize: 14, fill : 0x000000  } );
+
+        // Position it and add it to the stage
+        teamLiquidText.position.set( 20, 220 );
+        app.stage.addChild( teamLiquidText );
+
+        // TSM text
+        let tsmText = new PIXI.Text( 'TSM', { fontFamily : 'Arial', fontSize: 14, fill : 0x000000  } );
+
+        // Position it and add it to the stage
+        tsmText.position.set( 170, 220 );
+        app.stage.addChild( tsmText );
+
+        // Optic text
+        let opticText = new PIXI.Text( 'Optic Gaming', { fontFamily : 'Arial', fontSize: 14, fill : 0x000000  } );
+
+        // Position it and add it to the stage
+        opticText.position.set( 265, 220 );
+        app.stage.addChild( opticText );
+
+        // Creates team liquid sprite 
+        liquidAvatar = new Sprite( resources[ "teamLiquidAvatar.png" ].texture );
+
+        liquidAvatar.x = 50;
+        liquidAvatar.y = 250;
+
+        app.stage.addChild( liquidAvatar );
+
+        // Creates tsm sprite 
+        tsmAvatar = new Sprite( resources[ "tsmAvatar.png" ].texture );
+
+        tsmAvatar.x = 170;
+        tsmAvatar.y = 250;
+
+        app.stage.addChild( tsmAvatar );
+
+        // Creates optic sprite 
+        opticAvatar = new Sprite( resources[ "opticAvatar.png" ].texture );
+
+        opticAvatar.x = 290;
+        opticAvatar.y = 250;
+
+        app.stage.addChild( opticAvatar );
+
+        // Creates mover sprite 
+        mover = new Sprite( resources[ "mover.png" ].texture );
+
+        mover.x = 30;
+        mover.y = 258;
+
+        app.stage.addChild( mover );
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( mover.position.x > 50 && moveHorizontal )
+          {
+            mover.position.x -= 120;
+          }
+        };
+
+        // A key release method
+        aKey.release = () => 
+        {
+          mover.position.x += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( mover.position.x < 270 && moveHorizontal )
+          {
+            mover.position.x += 120;
+          }
+        };
+
+        // D press method
+        dKey.release = () => 
+        {
+          mover.position.x += 0;
+        };
+
+        // Space press method
+        space.press = () => 
+        {
+          // If user choose team liquid avatar
+          if ( mover.position.x <= 35 && canPressSpace )
+          {
+            canPressSpace = false;
+            userAvatar = new Sprite( resources[ "teamLiquidAvatar.png" ].texture );
+            app.stage.removeChild( avatarText );
+            app.stage.removeChild( teamLiquidText );
+            app.stage.removeChild( tsmText );
+            app.stage.removeChild( opticText );
+            app.stage.removeChild( mover );
+            app.stage.removeChild( tsmAvatar );
+            app.stage.removeChild( opticAvatar );
+            app.stage.removeChild( liquidAvatar );
+            app.stage.addChild( userAvatar );
+            firstQuestion();
+          }
+
+          // If user chooses tsm avatar
+          else if ( mover.position.x == 150 && canPressSpace )
+          {
+            canPressSpace = false;
+            userAvatar = new Sprite( resources[ "tsmAvatar.png" ].texture );
+            app.stage.removeChild( avatarText );
+            app.stage.removeChild( teamLiquidText );
+            app.stage.removeChild( tsmText );
+            app.stage.removeChild( opticText );
+            app.stage.removeChild( mover );
+            app.stage.removeChild( tsmAvatar );
+            app.stage.removeChild( opticAvatar );
+            app.stage.removeChild( liquidAvatar );
+            app.stage.addChild( userAvatar );
+            firstQuestion();
+          }
+
+          // If user chooses optic gaming avatar
+          else if ( mover.position.x == 270 && canPressSpace )
+          {
+            canPressSpace = false;
+            userAvatar = new Sprite( resources[ "opticAvatar.png" ].texture );
+            app.stage.removeChild( avatarText );
+            app.stage.removeChild( teamLiquidText );
+            app.stage.removeChild( tsmText );
+            app.stage.removeChild( opticText );
+            app.stage.removeChild( mover );
+            app.stage.removeChild( tsmAvatar );
+            app.stage.removeChild( opticAvatar );
+            app.stage.removeChild( liquidAvatar );
+            app.stage.addChild( userAvatar );
+            firstQuestion();
+          }
+        };
+      }
+
+      function firstQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveInAllDirections = true;
+        score = "0";
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreText = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreText.position.set( 8, 10 );
+        app.stage.addChild( scoreText );
+
+        // Question one text
+        let questionOneText = new PIXI.Text( 'Who won NA LCS 2019 Summer Split?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionOneText.position.set( 50, 30 );
+        app.stage.addChild( questionOneText );
+
+        // Question one answer one
+        let questionOneAnswerOne = new PIXI.Text( 'CLG', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionOneAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionOneAnswerOne );
+
+        questionOneAnswerOne.x = 30;
+        questionOneAnswerOne.y = 200;
+
+        // Question one answer two
+        let questionOneAnswerTwo = new PIXI.Text( 'Clutch Gaming', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionOneAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionOneAnswerTwo );
+
+        questionOneAnswerTwo.x = 200;
+        questionOneAnswerTwo.y = 100;
+
+        // Question one answer three
+        let questionOneAnswerThree = new PIXI.Text( 'Team Liquid', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionOneAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionOneAnswerThree );
+
+        questionOneAnswerThree.x = 250;
+        questionOneAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveInAllDirections && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionOneAnswerOne.x + 10 ) && ( userAvatar.x >= questionOneAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerOne.y + 10 ) && ( userAvatar.y >= questionOneAnswerOne.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerTwo.x + 10 ) && ( userAvatar.x >= questionOneAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerTwo.y + 10 ) && ( userAvatar.y >= questionOneAnswerTwo.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerThree.x + 10 ) && ( userAvatar.x >= questionOneAnswerThree.x - 5 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerThree.y + 10 ) && ( userAvatar.y >= questionOneAnswerThree.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              secondQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveInAllDirections && userAvatar.position.x > 10 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionOneAnswerOne.x + 10 ) && ( userAvatar.x >= questionOneAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerOne.y + 10 ) && ( userAvatar.y >= questionOneAnswerOne.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerTwo.x + 10 ) && ( userAvatar.x >= questionOneAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerTwo.y + 10 ) && ( userAvatar.y >= questionOneAnswerTwo.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerThree.x + 10 ) && ( userAvatar.x >= questionOneAnswerThree.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerThree.y + 10 ) && ( userAvatar.y >= questionOneAnswerThree.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              secondQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveInAllDirections && userAvatar.position.y < 360 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionOneAnswerOne.x + 10 ) && ( userAvatar.x >= questionOneAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerOne.y + 10 ) && ( userAvatar.y >= questionOneAnswerOne.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerTwo.x + 10 ) && ( userAvatar.x >= questionOneAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerTwo.y + 10 ) && ( userAvatar.y >= questionOneAnswerTwo.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerThree.x + 10 ) && ( userAvatar.x >= questionOneAnswerThree.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerThree.y + 10 ) && ( userAvatar.y >= questionOneAnswerThree.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              secondQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveInAllDirections && userAvatar.position.x < 360 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionOneAnswerOne.x + 10 ) && ( userAvatar.x >= questionOneAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerOne.y + 10 ) && ( userAvatar.y >= questionOneAnswerOne.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerTwo.x + 10 ) && ( userAvatar.x >= questionOneAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerTwo.y + 10 ) && ( userAvatar.y >= questionOneAnswerTwo.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              secondQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionOneAnswerThree.x + 10 ) && ( userAvatar.x >= questionOneAnswerThree.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionOneAnswerThree.y + 10 ) && ( userAvatar.y >= questionOneAnswerThree.y - 10 ) ) )
+            {
+              moveInAllDirections = false;
+              app.stage.removeChild( questionOneText );
+              app.stage.removeChild( questionOneAnswerOne );
+              app.stage.removeChild( questionOneAnswerTwo );
+              app.stage.removeChild( questionOneAnswerThree );
+              app.stage.removeChild( scoreText );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              secondQuestion();
+            }
+          }
+        };
+
+        // D press method
+        dKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+      }
+
+      function secondQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionTwo = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextTwo = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextTwo.position.set( 8, 10 );
+        app.stage.addChild( scoreTextTwo );
+
+        // Question two text
+        let questionTwoText = new PIXI.Text( 'When can you level up your Ultimate?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTwoText.position.set( 50, 30 );
+        app.stage.addChild( questionTwoText );
+
+        // Question two answer one
+        let questionTwoAnswerOne = new PIXI.Text( 'Level 6', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTwoAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionTwoAnswerOne );
+
+        questionTwoAnswerOne.x = 30;
+        questionTwoAnswerOne.y = 200;
+
+        // Question two answer two
+        let questionTwoAnswerTwo = new PIXI.Text( 'Level 3', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTwoAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionTwoAnswerTwo );
+
+        questionTwoAnswerTwo.x = 200;
+        questionTwoAnswerTwo.y = 100;
+
+        // Question two answer three
+        let questionTwoAnswerThree = new PIXI.Text( 'Level 10', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTwoAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionTwoAnswerThree );
+
+        questionTwoAnswerThree.x = 250;
+        questionTwoAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionTwo && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionTwoAnswerOne.x + 10 ) && ( userAvatar.x >= questionTwoAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerOne.y + 10 ) && ( userAvatar.y >= questionTwoAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTwoAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTwoAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerThree.x + 10 ) && ( userAvatar.x >= questionTwoAnswerThree.x - 5 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerThree.y + 10 ) && ( userAvatar.y >= questionTwoAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionTwo && userAvatar.position.x > 10 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionTwoAnswerOne.x + 10 ) && ( userAvatar.x >= questionTwoAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerOne.y + 10 ) && ( userAvatar.y >= questionTwoAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTwoAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTwoAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerThree.x + 10 ) && ( userAvatar.x >= questionTwoAnswerThree.x - 5 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerThree.y + 10 ) && ( userAvatar.y >= questionTwoAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionTwo && userAvatar.position.y < 360 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionTwoAnswerOne.x + 10 ) && ( userAvatar.x >= questionTwoAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerOne.y + 10 ) && ( userAvatar.y >= questionTwoAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTwoAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTwoAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerThree.x + 10 ) && ( userAvatar.x >= questionTwoAnswerThree.x - 5 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerThree.y + 10 ) && ( userAvatar.y >= questionTwoAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionTwo && userAvatar.position.x < 360 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionTwoAnswerOne.x + 10 ) && ( userAvatar.x >= questionTwoAnswerOne.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerOne.y + 10 ) && ( userAvatar.y >= questionTwoAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTwoAnswerTwo.x - 10 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTwoAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTwoAnswerThree.x + 10 ) && ( userAvatar.x >= questionTwoAnswerThree.x - 5 ) ) 
+                 && ( ( userAvatar.y <= questionTwoAnswerThree.y + 10 ) && ( userAvatar.y >= questionTwoAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTwo = false;
+              app.stage.removeChild( questionTwoText );
+              app.stage.removeChild( questionTwoAnswerOne );
+              app.stage.removeChild( questionTwoAnswerTwo );
+              app.stage.removeChild( questionTwoAnswerThree );
+              app.stage.removeChild( scoreTextTwo );
+              thirdQuestion();
+            }
+          }
+        };
+
+        // D press method
+        dKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+      }
+
+      function thirdQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionThree = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextThree = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextThree.position.set( 8, 10 );
+        app.stage.addChild( scoreTextThree );
+
+        // Question three text
+        let questionThreeText = new PIXI.Text( 'What object does Ziggs throw?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionThreeText.position.set( 50, 30 );
+        app.stage.addChild( questionThreeText );
+
+        // Question two answer one
+        let questionThreeAnswerOne = new PIXI.Text( 'Water balls', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionThreeAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionThreeAnswerOne );
+
+        questionThreeAnswerOne.x = 30;
+        questionThreeAnswerOne.y = 200;
+
+        // Question two answer two
+        let questionThreeAnswerTwo = new PIXI.Text( 'Feathers', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionThreeAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionThreeAnswerTwo );
+
+        questionThreeAnswerTwo.x = 200;
+        questionThreeAnswerTwo.y = 100;
+
+        // Question two answer three
+        let questionThreeAnswerThree = new PIXI.Text( 'Bombs', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionThreeAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionThreeAnswerThree );
+
+        questionThreeAnswerThree.x = 250;
+        questionThreeAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionThree && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionThreeAnswerOne.x + 10 ) && ( userAvatar.x >= questionThreeAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerOne.y + 10 ) && ( userAvatar.y >= questionThreeAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerTwo.x + 10 ) && ( userAvatar.x >= questionThreeAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerTwo.y + 10 ) && ( userAvatar.y >= questionThreeAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerThree.x + 10 ) && ( userAvatar.x >= questionThreeAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerThree.y + 10 ) && ( userAvatar.y >= questionThreeAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fourthQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionThree && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionThreeAnswerOne.x + 10 ) && ( userAvatar.x >= questionThreeAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerOne.y + 10 ) && ( userAvatar.y >= questionThreeAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerTwo.x + 10 ) && ( userAvatar.x >= questionThreeAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerTwo.y + 10 ) && ( userAvatar.y >= questionThreeAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerThree.x + 10 ) && ( userAvatar.x >= questionThreeAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerThree.y + 10 ) && ( userAvatar.y >= questionThreeAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fourthQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionThree && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionThreeAnswerOne.x + 10 ) && ( userAvatar.x >= questionThreeAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerOne.y + 10 ) && ( userAvatar.y >= questionThreeAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerTwo.x + 10 ) && ( userAvatar.x >= questionThreeAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerTwo.y + 10 ) && ( userAvatar.y >= questionThreeAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerThree.x + 10 ) && ( userAvatar.x >= questionThreeAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerThree.y + 10 ) && ( userAvatar.y >= questionThreeAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fourthQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionThree && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionThreeAnswerOne.x + 10 ) && ( userAvatar.x >= questionThreeAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerOne.y + 10 ) && ( userAvatar.y >= questionThreeAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerTwo.x + 10 ) && ( userAvatar.x >= questionThreeAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerTwo.y + 10 ) && ( userAvatar.y >= questionThreeAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              fourthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionThreeAnswerThree.x + 10 ) && ( userAvatar.x >= questionThreeAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionThreeAnswerThree.y + 10 ) && ( userAvatar.y >= questionThreeAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionThree = false;
+              app.stage.removeChild( questionThreeText );
+              app.stage.removeChild( questionThreeAnswerOne );
+              app.stage.removeChild( questionThreeAnswerTwo );
+              app.stage.removeChild( questionThreeAnswerThree );
+              app.stage.removeChild( scoreTextThree );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fourthQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+      }
+
+      function fourthQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionFour = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextFour = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextFour.position.set( 8, 10 );
+        app.stage.addChild( scoreTextFour );
+
+        // Question three text
+        let questionFourText = new PIXI.Text( 'What month does Worlds start?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFourText.position.set( 50, 30 );
+        app.stage.addChild( questionFourText );
+
+        // Question two answer one
+        let questionFourAnswerOne = new PIXI.Text( 'December', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFourAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionFourAnswerOne );
+
+        questionFourAnswerOne.x = 30;
+        questionFourAnswerOne.y = 200;
+
+        // Question two answer two
+        let questionFourAnswerTwo = new PIXI.Text( 'October', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFourAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionFourAnswerTwo );
+
+        questionFourAnswerTwo.x = 200;
+        questionFourAnswerTwo.y = 100;
+
+        // Question two answer three
+        let questionFourAnswerThree = new PIXI.Text( 'August', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFourAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionFourAnswerThree );
+
+        questionFourAnswerThree.x = 250;
+        questionFourAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionFour && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionFourAnswerOne.x + 10 ) && ( userAvatar.x >= questionFourAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerOne.y + 10 ) && ( userAvatar.y >= questionFourAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFourAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFourAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerThree.x + 10 ) && ( userAvatar.x >= questionFourAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerThree.y + 10 ) && ( userAvatar.y >= questionFourAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionFour && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionFourAnswerOne.x + 10 ) && ( userAvatar.x >= questionFourAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerOne.y + 10 ) && ( userAvatar.y >= questionFourAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFourAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFourAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerThree.x + 10 ) && ( userAvatar.x >= questionFourAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerThree.y + 10 ) && ( userAvatar.y >= questionFourAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionFour && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionFourAnswerOne.x + 10 ) && ( userAvatar.x >= questionFourAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerOne.y + 10 ) && ( userAvatar.y >= questionFourAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFourAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFourAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerThree.x + 10 ) && ( userAvatar.x >= questionFourAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerThree.y + 10 ) && ( userAvatar.y >= questionFourAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionFour && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionFourAnswerOne.x + 10 ) && ( userAvatar.x >= questionFourAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerOne.y + 10 ) && ( userAvatar.y >= questionFourAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFourAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFourAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              fifthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFourAnswerThree.x + 10 ) && ( userAvatar.x >= questionFourAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFourAnswerThree.y + 10 ) && ( userAvatar.y >= questionFourAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFour = false;
+              app.stage.removeChild( questionFourText );
+              app.stage.removeChild( questionFourAnswerOne );
+              app.stage.removeChild( questionFourAnswerTwo );
+              app.stage.removeChild( questionFourAnswerThree );
+              app.stage.removeChild( scoreTextFour );
+              fifthQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+      }
+
+      function fifthQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionFive = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextFive = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextFive.position.set( 8, 10 );
+        app.stage.addChild( scoreTextFive );
+
+        // Question five text
+        let questionFiveText = new PIXI.Text( 'Which region has won the most world titles?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFiveText.position.set( 50, 30 );
+        app.stage.addChild( questionFiveText );
+
+        // Question five answer one
+        let questionFiveAnswerOne = new PIXI.Text( 'Europe', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFiveAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionFiveAnswerOne );
+
+        questionFiveAnswerOne.x = 30;
+        questionFiveAnswerOne.y = 200;
+
+        // Question five answer two
+        let questionFiveAnswerTwo = new PIXI.Text( 'China', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFiveAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionFiveAnswerTwo );
+
+        questionFiveAnswerTwo.x = 200;
+        questionFiveAnswerTwo.y = 100;
+
+        // Question five answer three
+        let questionFiveAnswerThree = new PIXI.Text( 'Korea', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionFiveAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionFiveAnswerThree );
+
+        questionFiveAnswerThree.x = 250;
+        questionFiveAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionFive && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionFiveAnswerOne.x + 10 ) && ( userAvatar.x >= questionFiveAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerOne.y + 10 ) && ( userAvatar.y >= questionFiveAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFiveAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFiveAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerThree.x + 10 ) && ( userAvatar.x >= questionFiveAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerThree.y + 10 ) && ( userAvatar.y >= questionFiveAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              sixthQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionFive && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionFiveAnswerOne.x + 10 ) && ( userAvatar.x >= questionFiveAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerOne.y + 10 ) && ( userAvatar.y >= questionFiveAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFiveAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFiveAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerThree.x + 10 ) && ( userAvatar.x >= questionFiveAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerThree.y + 10 ) && ( userAvatar.y >= questionFiveAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              sixthQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionFive && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionFiveAnswerOne.x + 10 ) && ( userAvatar.x >= questionFiveAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerOne.y + 10 ) && ( userAvatar.y >= questionFiveAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFiveAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFiveAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerThree.x + 10 ) && ( userAvatar.x >= questionFiveAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerThree.y + 10 ) && ( userAvatar.y >= questionFiveAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              sixthQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionFive && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionFiveAnswerOne.x + 10 ) && ( userAvatar.x >= questionFiveAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerOne.y + 10 ) && ( userAvatar.y >= questionFiveAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerTwo.x + 10 ) && ( userAvatar.x >= questionFiveAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerTwo.y + 10 ) && ( userAvatar.y >= questionFiveAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              sixthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionFiveAnswerThree.x + 10 ) && ( userAvatar.x >= questionFiveAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionFiveAnswerThree.y + 10 ) && ( userAvatar.y >= questionFiveAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionFive = false;
+              app.stage.removeChild( questionFiveText );
+              app.stage.removeChild( questionFiveAnswerOne );
+              app.stage.removeChild( questionFiveAnswerTwo );
+              app.stage.removeChild( questionFiveAnswerThree );
+              app.stage.removeChild( scoreTextFive );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              sixthQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function sixthQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionSix = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextSix = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextSix.position.set( 8, 10 );
+        app.stage.addChild( scoreTextSix );
+
+        // Question six text
+        let questionSixText = new PIXI.Text( 'Which champion is an ice witch?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSixText.position.set( 50, 30 );
+        app.stage.addChild( questionSixText );
+
+        // Question six answer one
+        let questionSixAnswerOne = new PIXI.Text( 'Lissandra', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSixAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionSixAnswerOne );
+
+        questionSixAnswerOne.x = 30;
+        questionSixAnswerOne.y = 200;
+
+        // Question six answer two
+        let questionSixAnswerTwo = new PIXI.Text( 'Morgana', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSixAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionSixAnswerTwo );
+
+        questionSixAnswerTwo.x = 200;
+        questionSixAnswerTwo.y = 100;
+
+        // Question six answer three
+        let questionSixAnswerThree = new PIXI.Text( 'Lux', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSixAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionSixAnswerThree );
+
+        questionSixAnswerThree.x = 250;
+        questionSixAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionSix && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionSixAnswerOne.x + 10 ) && ( userAvatar.x >= questionSixAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerOne.y + 10 ) && ( userAvatar.y >= questionSixAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSixAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSixAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerThree.x + 10 ) && ( userAvatar.x >= questionSixAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerThree.y + 10 ) && ( userAvatar.y >= questionSixAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionSix && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionSixAnswerOne.x + 10 ) && ( userAvatar.x >= questionSixAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerOne.y + 10 ) && ( userAvatar.y >= questionSixAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSixAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSixAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerThree.x + 10 ) && ( userAvatar.x >= questionSixAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerThree.y + 10 ) && ( userAvatar.y >= questionSixAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionSix && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionSixAnswerOne.x + 10 ) && ( userAvatar.x >= questionSixAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerOne.y + 10 ) && ( userAvatar.y >= questionSixAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSixAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSixAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerThree.x + 10 ) && ( userAvatar.x >= questionSixAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerThree.y + 10 ) && ( userAvatar.y >= questionSixAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionSix && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionSixAnswerOne.x + 10 ) && ( userAvatar.x >= questionSixAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerOne.y + 10 ) && ( userAvatar.y >= questionSixAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSixAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSixAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSixAnswerThree.x + 10 ) && ( userAvatar.x >= questionSixAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSixAnswerThree.y + 10 ) && ( userAvatar.y >= questionSixAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSix = false;
+              app.stage.removeChild( questionSixText );
+              app.stage.removeChild( questionSixAnswerOne );
+              app.stage.removeChild( questionSixAnswerTwo );
+              app.stage.removeChild( questionSixAnswerThree );
+              app.stage.removeChild( scoreTextSix );
+              seventhQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function seventhQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionSeven = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextSeven = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextSeven.position.set( 8, 10 );
+        app.stage.addChild( scoreTextSeven );
+
+        // Question seven text
+        let questionSevenText = new PIXI.Text( 'What game mode takes place on a bridge?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSevenText.position.set( 50, 30 );
+        app.stage.addChild( questionSevenText );
+
+        // Question seven answer one
+        let questionSevenAnswerOne = new PIXI.Text( 'Twisted Treeline', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSevenAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionSevenAnswerOne );
+
+        questionSevenAnswerOne.x = 30;
+        questionSevenAnswerOne.y = 200;
+
+        // Question seven answer two
+        let questionSevenAnswerTwo = new PIXI.Text( 'ARAM', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSevenAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionSevenAnswerTwo );
+
+        questionSevenAnswerTwo.x = 200;
+        questionSevenAnswerTwo.y = 100;
+
+        // Question seven answer three
+        let questionSevenAnswerThree = new PIXI.Text( 'Teamfight Tactics', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionSevenAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionSevenAnswerThree );
+
+        questionSevenAnswerThree.x = 250;
+        questionSevenAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionSeven && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionSevenAnswerOne.x + 10 ) && ( userAvatar.x >= questionSevenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerOne.y + 10 ) && ( userAvatar.y >= questionSevenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSevenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSevenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              eighthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerThree.x + 10 ) && ( userAvatar.x >= questionSevenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerThree.y + 10 ) && ( userAvatar.y >= questionSevenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              eighthQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionSeven && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionSevenAnswerOne.x + 10 ) && ( userAvatar.x >= questionSevenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerOne.y + 10 ) && ( userAvatar.y >= questionSevenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSevenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSevenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              eighthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerThree.x + 10 ) && ( userAvatar.x >= questionSevenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerThree.y + 10 ) && ( userAvatar.y >= questionSevenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              eighthQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionSeven && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionSevenAnswerOne.x + 10 ) && ( userAvatar.x >= questionSevenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerOne.y + 10 ) && ( userAvatar.y >= questionSevenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSevenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSevenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              eighthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerThree.x + 10 ) && ( userAvatar.x >= questionSevenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerThree.y + 10 ) && ( userAvatar.y >= questionSevenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              eighthQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionSeven && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionSevenAnswerOne.x + 10 ) && ( userAvatar.x >= questionSevenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerOne.y + 10 ) && ( userAvatar.y >= questionSevenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionSevenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionSevenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              eighthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionSevenAnswerThree.x + 10 ) && ( userAvatar.x >= questionSevenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionSevenAnswerThree.y + 10 ) && ( userAvatar.y >= questionSevenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionSeven = false;
+              app.stage.removeChild( questionSevenText );
+              app.stage.removeChild( questionSevenAnswerOne );
+              app.stage.removeChild( questionSevenAnswerTwo );
+              app.stage.removeChild( questionSevenAnswerThree );
+              app.stage.removeChild( scoreTextSeven );
+              eighthQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function eighthQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionEight = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextEight = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextEight.position.set( 8, 10 );
+        app.stage.addChild( scoreTextEight );
+
+        // Question eight text
+        let questionEightText = new PIXI.Text( 'What monster gives your minions a huge buff?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionEightText.position.set( 50, 30 );
+        app.stage.addChild( questionEightText );
+
+        // Question eight answer one
+        let questionEightAnswerOne = new PIXI.Text( 'Kraken', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionEightAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionEightAnswerOne );
+
+        questionEightAnswerOne.x = 30;
+        questionEightAnswerOne.y = 200;
+
+        // Question eight answer two
+        let questionEightAnswerTwo = new PIXI.Text( 'Baron', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionEightAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionEightAnswerTwo );
+
+        questionEightAnswerTwo.x = 200;
+        questionEightAnswerTwo.y = 100;
+
+        // Question eight answer three
+        let questionEightAnswerThree = new PIXI.Text( 'Hydra', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionEightAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionEightAnswerThree );
+
+        questionEightAnswerThree.x = 250;
+        questionEightAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionEight && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionEightAnswerOne.x + 10 ) && ( userAvatar.x >= questionEightAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerOne.y + 10 ) && ( userAvatar.y >= questionEightAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerTwo.x + 10 ) && ( userAvatar.x >= questionEightAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerTwo.y + 10 ) && ( userAvatar.y >= questionEightAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerThree.x + 10 ) && ( userAvatar.x >= questionEightAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerThree.y + 10 ) && ( userAvatar.y >= questionEightAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionEight && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionEightAnswerOne.x + 10 ) && ( userAvatar.x >= questionEightAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerOne.y + 10 ) && ( userAvatar.y >= questionEightAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerTwo.x + 10 ) && ( userAvatar.x >= questionEightAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerTwo.y + 10 ) && ( userAvatar.y >= questionEightAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerThree.x + 10 ) && ( userAvatar.x >= questionEightAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerThree.y + 10 ) && ( userAvatar.y >= questionEightAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionEight && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionEightAnswerOne.x + 10 ) && ( userAvatar.x >= questionEightAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerOne.y + 10 ) && ( userAvatar.y >= questionEightAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerTwo.x + 10 ) && ( userAvatar.x >= questionEightAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerTwo.y + 10 ) && ( userAvatar.y >= questionEightAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerThree.x + 10 ) && ( userAvatar.x >= questionEightAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerThree.y + 10 ) && ( userAvatar.y >= questionEightAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionEight && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionEightAnswerOne.x + 10 ) && ( userAvatar.x >= questionEightAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerOne.y + 10 ) && ( userAvatar.y >= questionEightAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerTwo.x + 10 ) && ( userAvatar.x >= questionEightAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerTwo.y + 10 ) && ( userAvatar.y >= questionEightAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              ninethQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionEightAnswerThree.x + 10 ) && ( userAvatar.x >= questionEightAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionEightAnswerThree.y + 10 ) && ( userAvatar.y >= questionEightAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionEight = false;
+              app.stage.removeChild( questionEightText );
+              app.stage.removeChild( questionEightAnswerOne );
+              app.stage.removeChild( questionEightAnswerTwo );
+              app.stage.removeChild( questionEightAnswerThree );
+              app.stage.removeChild( scoreTextEight );
+              ninethQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function ninethQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionNine = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextNine = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextNine.position.set( 8, 10 );
+        app.stage.addChild( scoreTextNine );
+
+        // Question nine text
+        let questionNineText = new PIXI.Text( 'Ahri has how many tails?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionNineText.position.set( 50, 30 );
+        app.stage.addChild( questionNineText );
+
+        // Question nine answer one
+        let questionNineAnswerOne = new PIXI.Text( '9', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionNineAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionNineAnswerOne );
+
+        questionNineAnswerOne.x = 30;
+        questionNineAnswerOne.y = 200;
+
+        // Question nine answer two
+        let questionNineAnswerTwo = new PIXI.Text( '8', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionNineAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionNineAnswerTwo );
+
+        questionNineAnswerTwo.x = 200;
+        questionNineAnswerTwo.y = 100;
+
+        // Question eight answer three
+        let questionNineAnswerThree = new PIXI.Text( '7', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionNineAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionNineAnswerThree );
+
+        questionNineAnswerThree.x = 250;
+        questionNineAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionNine && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionNineAnswerOne.x + 10 ) && ( userAvatar.x >= questionNineAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerOne.y + 10 ) && ( userAvatar.y >= questionNineAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerTwo.x + 10 ) && ( userAvatar.x >= questionNineAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerTwo.y + 10 ) && ( userAvatar.y >= questionNineAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerThree.x + 10 ) && ( userAvatar.x >= questionNineAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerThree.y + 10 ) && ( userAvatar.y >= questionNineAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionNine && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionNineAnswerOne.x + 10 ) && ( userAvatar.x >= questionNineAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerOne.y + 10 ) && ( userAvatar.y >= questionNineAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerTwo.x + 10 ) && ( userAvatar.x >= questionNineAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerTwo.y + 10 ) && ( userAvatar.y >= questionNineAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerThree.x + 10 ) && ( userAvatar.x >= questionNineAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerThree.y + 10 ) && ( userAvatar.y >= questionNineAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionNine && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionNineAnswerOne.x + 10 ) && ( userAvatar.x >= questionNineAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerOne.y + 10 ) && ( userAvatar.y >= questionNineAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerTwo.x + 10 ) && ( userAvatar.x >= questionNineAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerTwo.y + 10 ) && ( userAvatar.y >= questionNineAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerThree.x + 10 ) && ( userAvatar.x >= questionNineAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerThree.y + 10 ) && ( userAvatar.y >= questionNineAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionNine && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionNineAnswerOne.x + 10 ) && ( userAvatar.x >= questionNineAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerOne.y + 10 ) && ( userAvatar.y >= questionNineAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerTwo.x + 10 ) && ( userAvatar.x >= questionNineAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerTwo.y + 10 ) && ( userAvatar.y >= questionNineAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionNineAnswerThree.x + 10 ) && ( userAvatar.x >= questionNineAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionNineAnswerThree.y + 10 ) && ( userAvatar.y >= questionNineAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionNine = false;
+              app.stage.removeChild( questionNineText );
+              app.stage.removeChild( questionNineAnswerOne );
+              app.stage.removeChild( questionNineAnswerTwo );
+              app.stage.removeChild( questionNineAnswerThree );
+              app.stage.removeChild( scoreTextNine );
+              tenthQuestion();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function tenthQuestion()
+      {
+        canMove = false;
+        moveHorizontal = false;
+        moveForQuestionTen = true;
+
+        // Assigns keyboard keys to variables
+        let wKey = keyboard( 87 );
+        let aKey = keyboard( 65 );
+        let sKey = keyboard( 83 );
+        let dKey = keyboard( 68 );
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let scoreTextTen = new PIXI.Text( 'Score: ' + score, { fontFamily : 'Arial', fontSize: 12, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        scoreTextTen.position.set( 8, 10 );
+        app.stage.addChild( scoreTextTen );
+
+        // Question ten text
+        let questionTenText = new PIXI.Text( 'What is the acronym Ultra Rapid Fire?', { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTenText.position.set( 50, 30 );
+        app.stage.addChild( questionTenText );
+
+        // Question ten answer one
+        let questionTenAnswerOne = new PIXI.Text( 'GGEZ', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTenAnswerOne.position.set( 30, 200 );
+        app.stage.addChild( questionTenAnswerOne );
+
+        questionTenAnswerOne.x = 30;
+        questionTenAnswerOne.y = 200;
+
+        // Question nine answer two
+        let questionTenAnswerTwo = new PIXI.Text( 'GLHF', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTenAnswerTwo.position.set( 200, 100 );
+        app.stage.addChild( questionTenAnswerTwo );
+
+        questionTenAnswerTwo.x = 200;
+        questionTenAnswerTwo.y = 100;
+
+        // Question ten answer three
+        let questionTenAnswerThree = new PIXI.Text( 'URF', { fontFamily : 'Arial', fontSize: 13, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        questionTenAnswerThree.position.set( 250, 300 );
+        app.stage.addChild( questionTenAnswerThree );
+
+        questionTenAnswerThree.x = 250;
+        questionTenAnswerThree.y = 300;
+
+        // W press method
+        wKey.press = () => 
+        {
+          if ( moveForQuestionTen && userAvatar.position.y > 50 )
+          {
+            userAvatar.y -= 4;
+
+            if ( ( ( userAvatar.x <= questionTenAnswerOne.x + 10 ) && ( userAvatar.x >= questionTenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerOne.y + 10 ) && ( userAvatar.y >= questionTenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              endGame();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerThree.x + 10 ) && ( userAvatar.x >= questionTenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerThree.y + 10 ) && ( userAvatar.y >= questionTenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              endGame();
+            }
+          }
+        };
+
+        // W key release method
+        wKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // A press method
+        aKey.press = () => 
+        {
+          if ( moveForQuestionTen && userAvatar.position.y > 50 )
+          {
+            userAvatar.x -= 4;
+
+            if ( ( ( userAvatar.x <= questionTenAnswerOne.x + 10 ) && ( userAvatar.x >= questionTenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerOne.y + 10 ) && ( userAvatar.y >= questionTenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              endGame();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerThree.x + 10 ) && ( userAvatar.x >= questionTenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerThree.y + 10 ) && ( userAvatar.y >= questionTenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              endGame();
+            }
+          }
+        };
+
+        // A press method
+        aKey.release = () => 
+        {
+          userAvatar.x += 0;
+        };
+
+        // S press method
+        sKey.press = () => 
+        {
+          if ( moveForQuestionTen && userAvatar.position.y > 50 )
+          {
+            userAvatar.y += 4;
+
+            if ( ( ( userAvatar.x <= questionTenAnswerOne.x + 10 ) && ( userAvatar.x >= questionTenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerOne.y + 10 ) && ( userAvatar.y >= questionTenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              endGame();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerThree.x + 10 ) && ( userAvatar.x >= questionTenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerThree.y + 10 ) && ( userAvatar.y >= questionTenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              endGame();
+            }
+          }
+        };
+
+        // S key release method
+        sKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+
+        // D press method
+        dKey.press = () => 
+        {
+          if ( moveForQuestionTen && userAvatar.position.y > 50 )
+          {
+            userAvatar.x += 4;
+
+            if ( ( ( userAvatar.x <= questionTenAnswerOne.x + 10 ) && ( userAvatar.x >= questionTenAnswerOne.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerOne.y + 10 ) && ( userAvatar.y >= questionTenAnswerOne.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              endGame();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerTwo.x + 10 ) && ( userAvatar.x >= questionTenAnswerTwo.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerTwo.y + 10 ) && ( userAvatar.y >= questionTenAnswerTwo.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              tenthQuestion();
+            }
+
+            else if ( ( ( userAvatar.x <= questionTenAnswerThree.x + 10 ) && ( userAvatar.x >= questionTenAnswerThree.x - 5 ) ) && ( ( userAvatar.y <= questionTenAnswerThree.y + 10 ) && ( userAvatar.y >= questionTenAnswerThree.y - 10 ) ) )
+            {
+              moveForQuestionTen = false;
+              app.stage.removeChild( questionTenText );
+              app.stage.removeChild( questionTenAnswerOne );
+              app.stage.removeChild( questionTenAnswerTwo );
+              app.stage.removeChild( questionTenAnswerThree );
+              app.stage.removeChild( scoreTextTen );
+              newScore = parseInt( score ) + 100;
+              score = newScore.toString();
+              endGame();
+            }
+          }
+        };
+
+        // D key release method
+        dKey.release = () => 
+        {
+          userAvatar.y += 0;
+        };
+      }
+
+      function endGame()
+      {
+        canMove = false;
+        moveHorizontal = false;
+
+        userAvatar.x = 180;
+        userAvatar.y = 300;
+
+        // Score text
+        let endScore = new PIXI.Text( 'You have earned a Mastery Level Score of: ' + score, { fontFamily : 'Arial', fontSize: 16, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        endScore.position.set( 35, 30 );
+        app.stage.addChild( endScore );
+
+        // Score text two
+        let message = new PIXI.Text( 'GREAT JOB!', { fontFamily : 'Arial', fontSize: 14, fill : 0x000000 } );
+
+        // Position it and add it to the stage
+        message.position.set( 155, 120 );
+        app.stage.addChild( message );
+      }
+
+      // Keyboard function 
+      function keyboard( keyCode ) 
+      {
+        var key = {};
+        key.code = keyCode;
+        key.isDown = false;
+        key.isUp = true;         
+
+        key.downHandler = event => 
+        {
+          if ( event.keyCode == key.code && key.press )
+          {
+              key.press();
+              key.isDown = true;
+              key.isUp = false;
+          }
+          
+          event.preventDefault();
+        };
+
+        key.upHandler = event => 
+        {
+          if ( event.keyCode == key.code && key.release )
+          {
+              key.release();
+              key.isDown = false;
+              key.isUp = true;
+          }
+          
+          event.preventDefault();
+        };
+
+        window.addEventListener( "keydown", key.downHandler.bind( key ), false );
+        window.addEventListener( "keyup", key.upHandler.bind( key ), false );
+        return key;
+      }
+
+    </script>
+
+    <p>Click the buttons to play or pause the audio.</p>
+
+    <button onclick="playAudio()" type="button">Play Audio</button>
+    <button onclick="pauseAudio()" type="button">Pause Audio</button> 
+
+    <script>
+
+    var song = document.getElementById("audio"); 
+
+    function playAudio() 
+    { 
+      song.play(); 
+    } 
+
+    function pauseAudio() 
+    { 
+      song.pause(); 
+    } 
+
+    </script>
+
+    <div id="disqus_thread"></div>
+
+    <h1>Comments</h1>
+
+    <script>
+
+		( function() 
+      	{
+        	var d = document, s = d.createElement( 'script' );
+
+        	s.src = 'http://nau-cs413.disqus.com/embed.js';
+
+        	s.setAttribute('data-timestamp', + new Date());
+
+        	( d.head || d.body ).appendChild( s );
+      	} )(); 
+
+    </script>
+
+  </body>
